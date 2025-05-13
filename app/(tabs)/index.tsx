@@ -1,75 +1,97 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import * as React from 'react';
+import { FlatList, SafeAreaView, StyleSheet, View } from 'react-native';
+import { Button, Card, IconButton, Provider as PaperProvider, Text, TextInput } from 'react-native-paper';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+export default function App() {
+  const dummyList = [
+    { id: '1', title: '買い物に行く', isEditing: false, isDone: true },
+    { id: '2', title: 'レポートを書く', isEditing: true, isDone: false },
+  ];
 
-export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <PaperProvider>
+      <SafeAreaView style={styles.container}>
+        {/* フォームとボタン */}
+        <View style={styles.formRow}>
+          <TextInput
+            label="タスクを入力"
+            mode="outlined"
+            style={styles.input}
+          />
+          <Button mode="contained" style={styles.addButton}>
+            新規登録
+          </Button>
+        </View>
+
+        {/* リスト表示 */}
+        <FlatList
+          data={dummyList}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <Card style={styles.card}>
+              <Card.Content style={styles.cardContent}>
+                {/* 文字表示部分 */}
+                {item.isEditing ? (
+                  <TextInput value={item.title} style={styles.editField} mode="outlined" />
+                ) : (
+                  <Text style={[styles.taskText, item.isDone && styles.strikeThrough]}>
+                    {item.title}
+                  </Text>
+                )}
+
+                {/* ボタン群 */}
+                <View style={styles.buttonGroup}>
+                  <IconButton icon="check" onPress={() => {}} />
+                  <IconButton icon="pencil" onPress={() => {}} />
+                  <IconButton icon="delete" onPress={() => {}} />
+                </View>
+              </Card.Content>
+            </Card>
+          )}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      </SafeAreaView>
+    </PaperProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    padding: 16,
+    marginTop: 50,
+    marginHorizontal: 500,
   },
-  stepContainer: {
-    gap: 8,
+  formRow: {
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  input: {
+    flex: 1,
+    marginRight: 8,
+  },
+  addButton: {
+    alignSelf: 'center',
+  },
+  card: {
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  cardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  taskText: {
+    flex: 1,
+    fontSize: 16,
+  },
+  strikeThrough: {
+    textDecorationLine: 'line-through',
+    color: '#999',
+  },
+  buttonGroup: {
+    flexDirection: 'row',
+  },
+  editField: {
+    flex: 1,
+    marginRight: 8,
   },
 });
