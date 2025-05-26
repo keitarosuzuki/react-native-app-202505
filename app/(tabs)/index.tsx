@@ -1,3 +1,4 @@
+import { db } from '@/firebaseConfig';
 import * as React from 'react';
 import { FlatList, SafeAreaView, StyleSheet, View } from 'react-native';
 import { Button, Card, IconButton, Provider as PaperProvider, Text, TextInput } from 'react-native-paper';
@@ -7,6 +8,10 @@ export default function App() {
     { id: '1', title: '買い物に行く', isEditing: false, isDone: true },
     { id: '2', title: 'レポートを書く', isEditing: true, isDone: false },
   ];
+
+  React.useEffect(() => {
+    console.log(db);
+  })
 
   return (
     <PaperProvider>
