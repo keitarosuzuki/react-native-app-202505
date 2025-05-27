@@ -1,17 +1,48 @@
 import { db } from '@/firebaseConfig';
+import { onValue, push, ref, remove, set, update } from 'firebase/database';
 import * as React from 'react';
 import { FlatList, SafeAreaView, StyleSheet, View } from 'react-native';
 import { Button, Card, IconButton, Provider as PaperProvider, Text, TextInput } from 'react-native-paper';
 
 export default function App() {
-  const dummyList = [
-    { id: '1', title: '買い物に行く', isEditing: false, isDone: true },
-    { id: '2', title: 'レポートを書く', isEditing: true, isDone: false },
-  ];
+  const [taskList, setTaskList] = React.useState<any[]>([]);
+  const [inputText, setInputText] = React.useState('');
 
   React.useEffect(() => {
-    console.log(db);
-  })
+    const tasksRef = ref(db, 'tasks/');
+    const unsubscribe = onValue(tasksRef, (snapshot) => {
+      const data = snapshot.val() || {};
+      const items = Object.entries(data).map(([id, value]: any) => ({
+        id,
+        ...value,
+      }));
+      setTaskList(items);
+    });
+
+    return () => unsubscribe(); // クリーンアップ
+  }, []);
+
+  const handleAddTask = async () => {
+    if (!inputText.trim()) return;
+
+    const newRef = push(ref(db, 'tasks/'));
+    await set(newRef, {
+      title: inputText,
+      isEditing: false,
+      isDone: false,
+    });
+    setInputText('');
+  };
+
+  const toggleDone = async (item: any) => {
+    await update(ref(db, `tasks/${item.id}`), {
+      isDone: !item.isDone,
+    });
+  };
+
+  const handleDelete = async (id: string) => {
+    await remove(ref(db, `tasks/${id}`));
+  };
 
   return (
     <PaperProvider>
@@ -22,33 +53,27 @@ export default function App() {
             label="タスクを入力"
             mode="outlined"
             style={styles.input}
+            value={inputText}
+            onChangeText={setInputText}
           />
-          <Button mode="contained" style={styles.addButton}>
+          <Button mode="contained" style={styles.addButton} onPress={handleAddTask}>
             新規登録
           </Button>
         </View>
 
         {/* リスト表示 */}
         <FlatList
-          data={dummyList}
+          data={taskList}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <Card style={styles.card}>
               <Card.Content style={styles.cardContent}>
-                {/* 文字表示部分 */}
-                {item.isEditing ? (
-                  <TextInput value={item.title} style={styles.editField} mode="outlined" />
-                ) : (
-                  <Text style={[styles.taskText, item.isDone && styles.strikeThrough]}>
-                    {item.title}
-                  </Text>
-                )}
-
-                {/* ボタン群 */}
+                <Text style={[styles.taskText, item.isDone && styles.strikeThrough]}>
+                  {item.title}
+                </Text>
                 <View style={styles.buttonGroup}>
-                  <IconButton icon="check" onPress={() => {}} />
-                  <IconButton icon="pencil" onPress={() => {}} />
-                  <IconButton icon="delete" onPress={() => {}} />
+                  <IconButton icon="check" onPress={() => toggleDone(item)} />
+                  <IconButton icon="delete" onPress={() => handleDelete(item.id)} />
                 </View>
               </Card.Content>
             </Card>
