@@ -19,11 +19,14 @@ export default function App() {
       setTaskList(items);
     });
 
-    return () => unsubscribe(); // クリーンアップ
+    return () => unsubscribe();
   }, []);
 
   const handleAddTask = async () => {
-    if (!inputText.trim()) return;
+    if (!inputText.trim()) {
+      alert("タスクを入力してください。")
+      return;
+    }
 
     const newRef = push(ref(db, 'tasks/'));
     await set(newRef, {
